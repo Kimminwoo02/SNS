@@ -6,7 +6,10 @@ import com.portfolio.sns.controller.request.UserJoinRequest;
 import com.portfolio.sns.controller.request.UserLoginRequest;
 import com.portfolio.sns.exception.ErrorCode;
 import com.portfolio.sns.exception.SnsApplicationException;
+import com.portfolio.sns.fixture.UserEntityFixture;
 import com.portfolio.sns.model.User;
+import com.portfolio.sns.model.entity.UserEntity;
+import com.portfolio.sns.repository.UserEntityRepository;
 import com.portfolio.sns.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.beans.Encoder;
+import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,6 +38,9 @@ public class UserControllerTest {
     private ObjectMapper objectMapper;
     @MockBean
     private UserService userService;
+    @Autowired
+    private UserEntityRepository userEntityRepository;
+
     @Test
     public void 회원가입() throws Exception {
         String userName = "userName";
@@ -39,7 +48,7 @@ public class UserControllerTest {
 
 
         when(userService.join(userName,password)).thenReturn(mock(User.class));
-        mockMvc.perform(post("api/v1/users/join")
+        mockMvc.perform(post("/api/v1/users/join")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName,password)))
         ).andDo(print())
@@ -52,9 +61,9 @@ public class UserControllerTest {
         String password = "password";
 
 
-        when(userService.join(userName,password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,""));
+        when(userService.join(userName,password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME));
 
-        mockMvc.perform(post("api/v1/users/join")
+        mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName,password)))
                 ).andDo(print())
@@ -70,7 +79,7 @@ public class UserControllerTest {
 
         when(userService.login(userName,password)).thenReturn("test_token");
 
-        mockMvc.perform(post("api/v1/users/join")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName,password)))
                 ).andDo(print())
@@ -82,9 +91,9 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.login(userName,password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,""));
+        when(userService.login(userName,password)).thenThrow(new SnsApplicationException(ErrorCode.USER_NOT_FOUND));
 
-        mockMvc.perform(post("api/v1/users/join")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName,password)))
                 ).andDo(print())
@@ -96,9 +105,9 @@ public class UserControllerTest {
         String userName = "userName";
         String password = "password";
 
-        when(userService.login(userName,password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,""));
+        when(userService.login(userName,password)).thenThrow(new SnsApplicationException(ErrorCode.INVALID_PASSWORD));
 
-        mockMvc.perform(post("api/v1/users/join")
+        mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName,password)))
                 ).andDo(print())

@@ -16,3 +16,9 @@ spring:
 
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://ec2-54-160-109-68.compute-1.amazonaws.com/dcai0h0bdltuq4
+
+jwt:
+  secret-key: forTest_portFolio_SNS_Login_2023_KMW
+  # 30days
+  token:
+    expired-time-ms: 2592000000
