@@ -3,6 +3,7 @@ package com.portfolio.sns.model.entity;
 import com.portfolio.sns.model.User;
 import com.portfolio.sns.model.UserRole;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -17,6 +18,7 @@ import java.time.Instant;
 @Setter
 @SQLDelete(sql = "UPDATE \"post\" SET deleted_at = NOW() where id = ?")
 @Where(clause = "deleted_at is NULL")
+@NoArgsConstructor
 public class PostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
