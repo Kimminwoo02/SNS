@@ -48,6 +48,7 @@ public class UserControllerTest {
 
 
         when(userService.join(userName,password)).thenReturn(mock(User.class));
+
         mockMvc.perform(post("/api/v1/users/join")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName,password)))

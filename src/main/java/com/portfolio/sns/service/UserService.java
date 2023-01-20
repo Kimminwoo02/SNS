@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService  {
     private final UserEntityRepository userEntityRepository;
     private final BCryptPasswordEncoder encoder;
     @Value("${jwt.secret-key}")
@@ -25,7 +25,10 @@ public class UserService {
 
     @Value("${jwt.token.expired-time-ms}")
     private Long expiredTimeMs;
-
+    public User loadUserByUserName(String userName) {
+        return userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(()->
+                new SnsApplicationException(ErrorCode.USER_NOT_FOUND,String.format("%s not founded",userName)));
+    }
     @Transactional
     public User join(String userName, String password){
         //회원가입하려는 userName으로 회원가입된 user가 있는지
@@ -52,4 +55,6 @@ public class UserService {
         String token = JwtTokenUtils.generateToken(userName,secretKey,expiredTimeMs);
         return token;
     }
+
+
 }
