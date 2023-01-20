@@ -219,7 +219,7 @@ public class PostControllerTest {
     @Test
     @WithMockUser
     void 내_피드목록() throws Exception{
-        // TODO: mocking
+
         when(postService.my(any(),any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/posts/my")
@@ -238,6 +238,38 @@ public class PostControllerTest {
                 ).andDo(print())
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    @WithMockUser
+    void 좋아요기능() throws Exception{
+        mockMvc.perform(post("/api/v1/posts/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 좋아요버튼클릭시_로그인하지_않은경우() throws Exception{
+
+
+        mockMvc.perform(post("/api/v1/posts/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 좋아요버튼클릭시_게시글이없는_경우() throws Exception{
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(),any());
+        mockMvc.perform(post("/api/v1/posts/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+
 
 
 
