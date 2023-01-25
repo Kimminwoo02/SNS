@@ -2,6 +2,7 @@ package com.portfolio.sns.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.sns.SnsApplication;
+import com.portfolio.sns.controller.request.PostCommentRequest;
 import com.portfolio.sns.controller.request.PostCreateRequest;
 import com.portfolio.sns.controller.request.PostModifyRequest;
 import com.portfolio.sns.controller.request.UserJoinRequest;
@@ -264,6 +265,37 @@ public class PostControllerTest {
     void 좋아요버튼클릭시_게시글이없는_경우() throws Exception{
         doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(),any());
         mockMvc.perform(post("/api/v1/posts/likes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser
+    void 댓글기능() throws Exception{
+        mockMvc.perform(post("/api/v1/posts/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new PostCommentRequest("comment")))
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 댓글작성시_로그인하지_않은경우() throws Exception{
+
+
+        mockMvc.perform(post("/api/v1/posts/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void 댓글작성시_게시글이없는_경우() throws Exception{
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(),any());
+        mockMvc.perform(post("/api/v1/posts/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
                 .andExpect(status().isNotFound());

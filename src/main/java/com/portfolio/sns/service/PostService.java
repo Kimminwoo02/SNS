@@ -97,4 +97,8 @@ public class PostService {
                 new SnsApplicationException(ErrorCode.POST_NOT_FOUND,String.format("%s not founded", postId)));
         return likeEntityRepository.countByPost(postEntity);
     }
+    @Transactional
+    public void comment(Integer postId, String userName){
+
+    }
 }
