@@ -1,11 +1,9 @@
 package com.portfolio.sns.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.portfolio.sns.SnsApplication;
 import com.portfolio.sns.controller.request.PostCommentRequest;
 import com.portfolio.sns.controller.request.PostCreateRequest;
 import com.portfolio.sns.controller.request.PostModifyRequest;
-import com.portfolio.sns.controller.request.UserJoinRequest;
 import com.portfolio.sns.exception.ErrorCode;
 import com.portfolio.sns.exception.SnsApplicationException;
 import com.portfolio.sns.fixture.PostEntityFixture;
@@ -294,7 +292,7 @@ public class PostControllerTest {
     @Test
     @WithAnonymousUser
     void 댓글작성시_게시글이없는_경우() throws Exception{
-        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(),any());
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(),any(),any());
         mockMvc.perform(post("/api/v1/posts/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())

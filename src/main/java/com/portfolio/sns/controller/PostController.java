@@ -1,7 +1,9 @@
 package com.portfolio.sns.controller;
 
+import com.portfolio.sns.controller.request.PostCommentRequest;
 import com.portfolio.sns.controller.request.PostCreateRequest;
 import com.portfolio.sns.controller.request.PostModifyRequest;
+import com.portfolio.sns.controller.response.CommentResponse;
 import com.portfolio.sns.controller.response.PostResponse;
 import com.portfolio.sns.controller.response.Response;
 import com.portfolio.sns.model.Post;
@@ -10,6 +12,7 @@ import com.portfolio.sns.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,5 +63,15 @@ public class PostController {
     @GetMapping("{postId}/likes")
     public Response<Integer> likeCount(@PathVariable Integer postId, Authentication authentication){
         return Response.success(postService.likeCount(postId));
+    }
+
+    @PostMapping("{postId}/comments")
+    public Response<Void> comment(@PathVariable Integer postId, @RequestBody PostCommentRequest request, Authentication authentication){
+        postService.comment(postId, authentication.getName(), request.getComment());
+        return Response.success();
+    }
+    @GetMapping("{postId}/comments")
+    public Response<Page<CommentResponse>> comment(@PathVariable Integer postId, Pageable pageable, Authentication authentication){
+        return Response.success(postService.getComments(postId, pageable).map(CommentResponse::fromComment));
     }
 }
