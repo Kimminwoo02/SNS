@@ -2,12 +2,17 @@ package com.portfolio.sns.service;
 
 import com.portfolio.sns.exception.ErrorCode;
 import com.portfolio.sns.exception.SnsApplicationException;
+import com.portfolio.sns.model.Alarm;
 import com.portfolio.sns.model.User;
 import com.portfolio.sns.model.entity.UserEntity;
+import com.portfolio.sns.repository.AlarmEntityRepository;
 import com.portfolio.sns.repository.UserEntityRepository;
 import com.portfolio.sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService  {
     private final UserEntityRepository userEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
     private final BCryptPasswordEncoder encoder;
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -33,7 +39,7 @@ public class UserService  {
     public User join(String userName, String password){
         //회원가입하려는 userName으로 회원가입된 user가 있는지
         userEntityRepository.findByUserName(userName).ifPresent(it->{
-            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,String.format("%s is duplicated",userName));
+            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,String.format("userName is %s ",userName));
         });
 
         // 회원가입 진행 = user를 등록
@@ -41,15 +47,16 @@ public class UserService  {
         return User.fromEntity(userEntity);
     }
     //TODO : implement
-    public String login(String userName, String password){
+    public String login(String userName, String password) {
         // 회원가입여부
-        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(()->new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
 
         // 비밀번호 체크
-        if(!encoder.matches(password,userEntity.getPassword()) ){
-        //if(!userEntity.getPassword().equals(password)){
-            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME);
+        if (!encoder.matches(password, userEntity.getPassword())) {
+     //         if (!userEntity.getPassword().equals(password)) {
+            throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
+
 
         // 토큰 생성
         String token = JwtTokenUtils.generateToken(userName,secretKey,expiredTimeMs);
@@ -57,4 +64,12 @@ public class UserService  {
     }
 
 
+    //TODO : alarm return
+    public Page<Alarm> alarmList(String userName, Pageable pageable) {
+        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(()->new SnsApplicationException(ErrorCode.USER_NOT_FOUND,String.format("%s not founded",userName)));
+
+        return alarmEntityRepository.findAllByUser(userEntity,pageable).map(Alarm::fromEntity);
+
+
+    }
 }
